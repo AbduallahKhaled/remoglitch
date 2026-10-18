@@ -1,0 +1,175 @@
+/*
+ * RemoTap glitch theme (2026-10-18). Pure black (dark) or pure white (light), sharp corners,
+ * hand-drawn sketch borders on buttons and checkboxes, glitch colours only during a glitch.
+ * The theme lives on <html data-theme="dark|light">; the /lab sample uses the same rules on .lab.
+ */
+:root,
+.lab {
+  --bg: #000;
+  --fg: #fff;
+  --dim: rgba(255, 255, 255, 0.62);
+  --hair: rgba(255, 255, 255, 0.18);
+  --err: #ff007f;
+  --g-pink: #ff007f;
+  --g-cyan: #00ffd1;
+  --g-yellow: #fff000;
+  --g-blue: #007bff;
+  color-scheme: dark;
+}
+:root[data-theme="light"],
+.lab[data-theme="light"] {
+  --bg: #fff;
+  --fg: #000;
+  --dim: rgba(0, 0, 0, 0.6);
+  --hair: rgba(0, 0, 0, 0.16);
+  --err: #d6006a;
+  color-scheme: light;
+}
+.lab {
+  --foreground: var(--fg);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Onest", "Cairo", system-ui, sans-serif;
+}
+* { border-radius: 0 !important; --tw-shadow: 0 0 #0000 !important; }
+.lab-display { font-family: "Tektur", "Onest", "Cairo", sans-serif; font-weight: 800; letter-spacing: -0.02em; }
+:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
+
+/* Hero headline. */
+.lab-hero { font-family: "Tektur", "Cairo", sans-serif !important; font-size: clamp(44px, 10vw, 128px) !important; font-weight: 800 !important; letter-spacing: -0.02em; line-height: 0.98; white-space: pre-line; }
+[dir="rtl"] .lab-hero { letter-spacing: 0; line-height: 1.25; font-size: clamp(40px, 9vw, 112px) !important; }
+
+/* Tap glitch, 0.5s: the text flashes the glitch colours with an RGB split and jitters,
+   the box lines (border, sketch stroke, checkbox square) flash too. Photos and backgrounds stay. */
+.gx-tap { animation: gx-text 0.5s steps(1, end), gx-border 0.5s steps(1, end), gx-color 0.5s steps(1, end); }
+.gx-tap > .sketch, .gx-tap > .gx-box { animation: gx-stroke 0.5s steps(1, end); }
+.gx-tap > :not(.sketch):not(img):not(.gx-box):not(input):not(svg) { animation: gx-jitter 0.5s steps(1, end) both; }
+.gx-tap:not(:has(*)) { animation: gx-text 0.5s steps(1, end), gx-color 0.5s steps(1, end), gx-jitter 0.5s steps(1, end); }
+/* Product boxes ("items"): only the outer box flashes, the text and photo stay as they are. */
+.gx-tap[data-gx="box"] { animation: gx-border 0.5s steps(1, end); }
+.gx-tap[data-gx="box"] > :not(.sketch) { animation: none !important; }
+/* Inside a product item, a tap on its picture or name only flashes the item's frame (glitch-fx.tsx). */
+.gx-frame { animation: gx-border 0.5s steps(1, end); }
+@keyframes gx-jitter {
+  0%   { transform: translate(-3px, 0); clip-path: inset(0 0 45% 0); }
+  14%  { transform: translate(3px, 1px) skewX(-8deg); clip-path: inset(50% 0 0 0); }
+  28%  { transform: translate(-2px, 0); clip-path: none; }
+  42%  { transform: translate(4px, -1px) skewX(6deg); clip-path: inset(20% 0 30% 0); }
+  60%  { transform: translate(-1px, 0); clip-path: none; }
+  78%  { transform: translate(2px, 0); clip-path: inset(65% 0 0 0); }
+  100% { transform: none; clip-path: none; }
+}
+@keyframes gx-text {
+  0%   { text-shadow: -2px 0 var(--g-pink), 2px 0 var(--g-cyan); }
+  25%  { text-shadow: 2px 0 var(--g-pink), -2px 0 var(--g-yellow); }
+  50%  { text-shadow: -2px 0 var(--g-blue), 2px 0 var(--g-pink); }
+  75%  { text-shadow: 1px 0 var(--g-cyan), -1px 0 var(--g-blue); }
+  100% { text-shadow: none; }
+}
+@keyframes gx-color {
+  0%  { color: var(--g-cyan); }
+  25% { color: var(--g-pink); }
+  50% { color: var(--g-blue); }
+  75% { color: var(--g-yellow); }
+}
+@keyframes gx-stroke {
+  0%  { color: var(--g-pink); }
+  25% { color: var(--g-cyan); }
+  50% { color: var(--g-yellow); }
+  75% { color: var(--g-blue); }
+}
+@keyframes gx-border {
+  0%  { border-color: var(--g-pink); }
+  25% { border-color: var(--g-cyan); }
+  50% { border-color: var(--g-yellow); }
+  75% { border-color: var(--g-blue); }
+}
+
+/* Headline glitch: RGB split and slices, the letters never move.
+   gx-hero on tap (0.5s), gx-blip now and then on its own. */
+.gx-hero { animation: gx-hero 0.5s steps(1, end); }
+@keyframes gx-hero {
+  0%   { text-shadow: -5px 0 var(--g-pink), 5px 0 var(--g-cyan); clip-path: inset(0 0 40% 0); }
+  12%  { text-shadow: 6px 0 var(--g-yellow), -6px 0 var(--g-blue); clip-path: none; }
+  25%  { text-shadow: -4px 0 var(--g-cyan), 4px 0 var(--g-pink); clip-path: inset(45% 0 0 0); color: var(--g-cyan); }
+  40%  { text-shadow: 7px 0 var(--g-pink), -3px 0 var(--g-yellow); clip-path: none; color: var(--fg); }
+  55%  { text-shadow: -6px 0 var(--g-blue), 6px 0 var(--g-pink); clip-path: inset(20% 0 30% 0); }
+  70%  { text-shadow: 3px 0 var(--g-yellow), -3px 0 var(--g-cyan); clip-path: none; color: var(--g-pink); }
+  85%  { text-shadow: -2px 0 var(--g-pink), 2px 0 var(--g-blue); clip-path: inset(70% 0 0 0); color: var(--fg); }
+  100% { text-shadow: none; clip-path: none; }
+}
+.gx-blip { animation: gx-blip 0.22s steps(1, end); }
+@keyframes gx-blip {
+  0%   { text-shadow: -4px 0 var(--g-pink), 4px 0 var(--g-cyan); clip-path: inset(20% 0 45% 0); }
+  40%  { text-shadow: 3px 0 var(--g-yellow), -3px 0 var(--g-blue); clip-path: none; }
+  70%  { text-shadow: -2px 0 var(--g-cyan), 2px 0 var(--g-pink); clip-path: inset(60% 0 10% 0); }
+  100% { text-shadow: none; clip-path: none; }
+}
+
+/* Tap icon: sits at the tapped thing's top-left corner, always the opposite
+   of what is under it (difference blend), and glitches while it shows. */
+.tap-wifi {
+  position: fixed;
+  z-index: 9999;
+  width: 30px;
+  height: 30px;
+  pointer-events: none;
+  color: #fff;
+  mix-blend-mode: difference;
+  animation: tap-wifi 0.6s ease-out both;
+}
+.tap-wifi svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.tap-wifi .w-main { animation: tap-main 0.6s steps(1, end) both; }
+.tap-wifi .w-r { color: #ff007f; animation: tap-r 0.6s steps(1, end) both; }
+.tap-wifi .w-c { color: #00ffd1; animation: tap-c 0.6s steps(1, end) both; }
+.tap-wifi .a1 { animation: tap-arc 0.6s steps(1, end) both; }
+.tap-wifi .a2 { animation: tap-arc 0.6s 0.08s steps(1, end) both; }
+.tap-wifi .a3 { animation: tap-arc 0.6s 0.16s steps(1, end) both; }
+@keyframes tap-wifi {
+  0% { transform: translate(-65%, -65%) scale(0.6); opacity: 0; }
+  12% { transform: translate(-65%, -65%) scale(1); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translate(-65%, -85%) scale(1); opacity: 0; }
+}
+@keyframes tap-main {
+  0% { clip-path: inset(0 0 55% 0); transform: translateX(-3px); }
+  15% { clip-path: none; transform: none; }
+  35% { clip-path: inset(40% 0 20% 0); transform: translateX(3px); }
+  50% { clip-path: none; transform: none; }
+  70% { clip-path: inset(0 0 70% 0); transform: translateX(-2px); }
+  85%, 100% { clip-path: none; transform: none; }
+}
+@keyframes tap-r {
+  0% { transform: translate(-4px, 1px); opacity: 0.9; clip-path: inset(10% 0 40% 0); }
+  25% { transform: translate(3px, 0); clip-path: inset(50% 0 0 0); }
+  50% { transform: translate(-2px, -1px); clip-path: inset(0 0 60% 0); }
+  75% { transform: translate(2px, 0); opacity: 0.6; clip-path: none; }
+  100% { opacity: 0; }
+}
+@keyframes tap-c {
+  0% { transform: translate(4px, -1px); opacity: 0.9; clip-path: inset(45% 0 0 0); }
+  25% { transform: translate(-3px, 1px); clip-path: inset(0 0 50% 0); }
+  50% { transform: translate(2px, 0); clip-path: inset(30% 0 30% 0); }
+  75% { transform: translate(-1px, 0); opacity: 0.6; clip-path: none; }
+  100% { opacity: 0; }
+}
+@keyframes tap-arc { 0% { opacity: 0; } 20% { opacity: 1; } }
+
+/* Sketch boxes (hand-drawn border, sharp corners). .sk = outline, .sk-hatch = hatched main action.
+   The SVG is added by components/site/glitch-fx.tsx (SketchDecorator) or by <SketchBox>. */
+.sketch { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.sketch path { fill: none; stroke: currentColor; stroke-width: 1.6; vector-effect: non-scaling-stroke; stroke-linecap: square; }
+.sk, .sk-hatch { position: relative; isolation: isolate; border: 0 !important; background: transparent !important; color: var(--fg); }
+.sk > .sketch, .sk-hatch > .sketch { z-index: -1; }
+
+/* "Added to cart" note (bottom centre, above the WhatsApp button row). */
+.rt-toast { position: fixed; left: 50%; bottom: 88px; z-index: 70; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; padding: 10px 10px 10px 16px; background: var(--bg); color: var(--fg); border: 1px solid var(--fg); font-size: 14px; font-weight: 600; white-space: nowrap; animation: gx-hero 0.5s steps(1, end); }
+
+/* Loader overlay. */
+.rt-loader { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: opacity 0.2s; }
+.rt-loader.is-fading { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gx-tap, .gx-tap > *, .gx-blip, .gx-hero, .tap-wifi svg { animation: none !important; }
+  .tap-wifi { animation-duration: 0.01s; }
+}
