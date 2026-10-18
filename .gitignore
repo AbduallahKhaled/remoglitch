@@ -1,0 +1,23 @@
+# Dependencies and build output (rebuilt with npm install / npm run build / assemble.sh)
+node_modules/
+.next/
+out/
+out-preview/
+dist/
+remotap-upload.zip
+*.tsbuildinfo
+next-env.d.ts
+
+# Live order data written by the PHP backend on the server (keep the folders, not customer data)
+backend/data/orders/
+backend/data/taps/
+backend/data/admin.json
+backend/uploads/*
+!backend/uploads/.htaccess
+
+# Local env files
+.env*
+
+# Local restore copies (not part of the site)
+versions/
+admin-test/

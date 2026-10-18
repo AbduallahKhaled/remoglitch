@@ -1,0 +1,31 @@
+{
+  "slug": "demo",
+  "plan": "plus",
+  "active": true,
+  "expires": "",
+  "name": "RemoTap",
+  "title": "Smart NFC cards & stands, delivered all over Egypt",
+  "bio": "This is what your customers see when they tap a RemoTap card or stand. Try the buttons.",
+  "lang": "both",
+  "photo": "uploads/remotap-demo.png",
+  "links": [
+    {
+      "type": "whatsapp",
+      "value": "01127209609"
+    },
+    {
+      "type": "instagram",
+      "value": "@remotap"
+    },
+    {
+      "type": "instapay",
+      "value": "yourname@instapay"
+    }
+  ],
+  "primary": {
+    "type": "whatsapp",
+    "value": "01127209609"
+  },
+  "order_id": "",
+  "created": "2026-09-27"
+}

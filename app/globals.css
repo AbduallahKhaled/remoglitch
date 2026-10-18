@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/* RemoTap tokens. Since 2026-10-18 they follow the black-and-white glitch theme in app/glitch.css
+   (--bg / --fg switch with <html data-theme>). The old purple brand names are kept as aliases. */
+:root {
+  --ink: var(--bg);
+  --ink-2: var(--bg);
+  --ink-3: var(--bg);
+  --line: var(--hair);
+  --purple: var(--fg);
+  --blue: var(--fg);
+  --cyan: var(--fg);
+  --grad: linear-gradient(var(--fg), var(--fg));
+  --grad-rev: linear-gradient(var(--fg), var(--fg));
+
+  /* shadcn tokens */
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --card: var(--bg);
+  --card-foreground: var(--fg);
+  --popover: var(--bg);
+  --popover-foreground: var(--fg);
+  --primary: var(--fg);
+  --primary-foreground: var(--bg);
+  --secondary: color-mix(in srgb, var(--fg) 8%, var(--bg));
+  --secondary-foreground: var(--fg);
+  --muted: color-mix(in srgb, var(--fg) 6%, var(--bg));
+  --muted-foreground: var(--dim);
+  --accent: color-mix(in srgb, var(--fg) 10%, var(--bg));
+  --accent-foreground: var(--fg);
+  --destructive: var(--err);
+  --border: var(--hair);
+  --input: var(--hair);
+  --ring: var(--fg);
+  --radius: 0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-brand-purple: var(--purple);
+  --color-brand-blue: var(--blue);
+  --color-brand-cyan: var(--cyan);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  /* Michroma stands in for Lastica, which is not a free web font. */
+  --font-display: "Tektur", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Onest", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --animate-marquee: marquee var(--mq-dur, 32s) linear infinite;
+}
+
+/* To use the real Lastica brand font: add an @font-face for "Lastica" here (see SETUP.md). */
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@layer base {
+  * { border-color: var(--border); }
+  html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  [dir="rtl"] body { font-family: "Cairo", var(--font-sans); }
+  [dir="rtl"] .font-display { font-family: "Cairo", var(--font-display); font-weight: 800; letter-spacing: 0; }
+  ::selection { background: var(--fg); color: var(--bg); }
+}
+
+/* Old brand helpers, flattened to the black-and-white theme. */
+.text-grad { color: var(--fg); }
+.text-outline { color: transparent; -webkit-text-stroke: 1.5px var(--fg); }
+.rt-box { border: 1px solid var(--fg); }
+.rt-chip { display: inline-grid; place-items: center; flex: none; color: var(--fg); border: 1px solid var(--fg); }
+
+/* Chooser picture swap: short fade so the change is noticed. */
+@keyframes rt-fade { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
+
+/* Scroll reveal */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee { animation: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+}
+@keyframes acc-down { from { height: 0; } to { height: var(--radix-accordion-content-height); } }
+@keyframes acc-up { from { height: var(--radix-accordion-content-height); } to { height: 0; } }

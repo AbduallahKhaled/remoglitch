@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Free landing page demo | RemoTap</title>
+<meta name="description" content="This is the free landing page that comes with every RemoTap card. Tap the buttons to try it.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/png" href="../assets/img/favicon-48.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Michroma&family=Onest:wght@400;500;600;700&family=Tektur:wght@600;800&display=swap" rel="stylesheet">
+<script>
+/* Same light/dark choice as the shop (saved as rt-theme), else the phone's setting. */
+try{var t=localStorage.getItem('rt-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.dataset.theme=t}catch(e){}
+</script>
+<style>
+/* RemoTap free landing page, demo. Glitch theme: pure black or pure white, sharp corners,
+   hand-drawn button borders, glitch colours only during a tap. */
+:root{--bg:#000;--fg:#fff;--dim:rgba(255,255,255,.62);--hair:rgba(255,255,255,.18);--pink:#ff007f;--cyan:#00ffd1;--yellow:#fff000;--blue:#007bff;color-scheme:dark}
+:root[data-theme=light]{--bg:#fff;--fg:#000;--dim:rgba(0,0,0,.6);--hair:rgba(0,0,0,.16);color-scheme:light}
+*{box-sizing:border-box;border-radius:0}
+html,body{margin:0}
+body{min-height:100vh;min-height:100dvh;background:var(--bg);color:var(--fg);font-family:"Onest","Cairo",system-ui,sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;align-items:center}
+[dir=rtl] body{font-family:"Cairo","Onest",system-ui,sans-serif}
+a{color:inherit}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+
+/* Demo note (not part of the customer's page). */
+.note{width:100%;border-bottom:1px solid var(--hair);font-size:.82rem;color:var(--dim)}
+.note .in{max-width:440px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.note b{color:var(--fg);font-weight:600}
+.note a{white-space:nowrap;font-weight:600;color:var(--fg);text-underline-offset:3px}
+
+.wrap{width:100%;max-width:440px;padding:22px 18px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;flex:1}
+.top{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;gap:8px}
+.top .tools{display:flex;gap:8px}
+.chip{height:36px;min-width:40px;padding:0 10px;display:inline-grid;place-items:center;font-size:.8rem;font-weight:700;text-decoration:none}
+.mark{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.mark img{width:26px;height:26px}
+.word{font-family:"Michroma",sans-serif;font-size:.8rem;letter-spacing:.14em}
+.word .t{color:#8c52ff}.word .ap{color:#3776ff}
+
+/* Profile */
+.av{width:112px;height:112px;border:1px solid var(--fg);display:grid;place-items:center;font-family:"Tektur",sans-serif;font-weight:800;font-size:2.6rem;letter-spacing:-.02em}
+h1{font-family:"Tektur","Cairo",sans-serif;font-weight:800;font-size:2rem;letter-spacing:-.02em;margin:18px 0 6px;text-align:center;line-height:1.1;text-transform:uppercase}
+[dir=rtl] h1{letter-spacing:0;text-transform:none}
+.title{color:var(--dim);text-align:center;font-size:.98rem;margin:0}
+.bio{color:var(--dim);text-align:center;font-size:.92rem;margin:12px 0 0;max-width:34ch;line-height:1.6}
+
+/* Buttons */
+.btns{width:100%;display:grid;gap:12px;margin-top:28px}
+.b{position:relative;isolation:isolate;display:flex;align-items:center;gap:14px;width:100%;min-height:58px;padding:0 16px;text-decoration:none;font-weight:600;font-size:1rem;text-align:start;-webkit-tap-highlight-color:transparent}
+.b .i{width:34px;height:34px;display:grid;place-items:center;flex:none;border:1px solid currentColor}
+.b .i svg{width:18px;height:18px}
+.b .lbl{flex:1}
+.b .sub{display:block;font-size:.78rem;font-weight:400;color:var(--dim);direction:ltr;text-align:start}
+[dir=rtl] .b .sub{text-align:end}
+.b .arr{width:16px;height:16px;opacity:.5;flex:none}
+[dir=rtl] .b .arr{transform:scaleX(-1)}
+.b.main .i{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.sketch{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:-1}
+.sketch path{fill:none;stroke:currentColor;stroke-width:1.6;vector-effect:non-scaling-stroke;stroke-linecap:square}
+
+.foot{margin-top:auto;padding-top:40px;text-align:center;font-size:.8rem;color:var(--dim)}
+.foot a{color:var(--fg);font-weight:600;text-underline-offset:3px}
+
+/* Tap glitch (0.5s): text glitches and the border flashes the glitch colours. */
+.gx{animation:gx-color .5s steps(1,end),gx-text .5s steps(1,end)}
+.gx>.lbl,.gx:not(:has(*)){animation:gx-jit .5s steps(1,end)}
+.gx>.sketch,.gx>.i{animation:gx-color .5s steps(1,end)}
+@keyframes gx-color{0%{color:var(--cyan)}25%{color:var(--pink)}50%{color:var(--blue)}75%{color:var(--yellow)}}
+@keyframes gx-text{0%{text-shadow:-2px 0 var(--pink),2px 0 var(--cyan)}25%{text-shadow:2px 0 var(--pink),-2px 0 var(--yellow)}50%{text-shadow:-2px 0 var(--blue),2px 0 var(--pink)}75%{text-shadow:1px 0 var(--cyan),-1px 0 var(--blue)}100%{text-shadow:none}}
+@keyframes gx-jit{0%{transform:translate(-3px,0);clip-path:inset(0 0 45% 0)}14%{transform:translate(3px,1px) skewX(-8deg);clip-path:inset(50% 0 0 0)}28%{transform:translate(-2px,0);clip-path:none}42%{transform:translate(4px,-1px) skewX(6deg);clip-path:inset(20% 0 30% 0)}60%{transform:translate(-1px,0);clip-path:none}78%{transform:translate(2px,0);clip-path:inset(65% 0 0 0)}100%{transform:none;clip-path:none}}
+/* Wifi icon at the tapped button's corner, always the opposite of what is under it. */
+.wifi{position:fixed;z-index:99;width:30px;height:30px;pointer-events:none;color:#fff;mix-blend-mode:difference;animation:wifi .6s ease-out both}
+.wifi svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.wifi .r{color:#ff007f;animation:wr .6s steps(1,end) both}.wifi .c{color:#00ffd1;animation:wc .6s steps(1,end) both}
+@keyframes wifi{0%{transform:translate(-65%,-65%) scale(.6);opacity:0}12%{transform:translate(-65%,-65%) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(-65%,-85%);opacity:0}}
+@keyframes wr{0%{transform:translate(-4px,1px);clip-path:inset(10% 0 40% 0)}25%{transform:translate(3px,0);clip-path:inset(50% 0 0 0)}50%{transform:translate(-2px,-1px)}75%{opacity:.6;clip-path:none}100%{opacity:0}}
+@keyframes wc{0%{transform:translate(4px,-1px);clip-path:inset(45% 0 0 0)}25%{transform:translate(-3px,1px);clip-path:inset(0 0 50% 0)}50%{transform:translate(2px,0)}75%{opacity:.6;clip-path:none}100%{opacity:0}}
+/* Headline flicker now and then, letters never move. */
+.blip{animation:blip .22s steps(1,end)}
+@keyframes blip{0%{text-shadow:-4px 0 var(--pink),4px 0 var(--cyan);clip-path:inset(20% 0 45% 0)}40%{text-shadow:3px 0 var(--yellow),-3px 0 var(--blue);clip-path:none}70%{clip-path:inset(60% 0 10% 0)}100%{text-shadow:none;clip-path:none}}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--bg);color:var(--fg);border:1px solid var(--fg);padding:11px 16px;font-size:.9rem;font-weight:600;white-space:nowrap;z-index:100;display:none}
+.toast.show{display:block;animation:gx-text .5s steps(1,end)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="note"><div class="in"><span data-t="note"></span><a href="../shop/" data-t="get"></a></div></div>
+
+<main class="wrap">
+  <div class="top">
+    <a class="mark" href="../" aria-label="RemoTap"><img src="../assets/img/mark-64.png" alt=""><span class="word" dir="ltr">REMO<span class="t">T</span><span class="ap">AP</span></span></a>
+    <div class="tools">
+      <button type="button" class="chip sk" id="theme" aria-label="Light or dark"></button>
+      <button type="button" class="chip sk" id="lang"></button>
+    </div>
+  </div>
+
+  <div class="av" aria-hidden="true">OH</div>
+  <h1 id="name" data-t="name"></h1>
+  <p class="title" data-t="title"></p>
+  <p class="bio" data-t="bio"></p>
+
+  <div class="btns" id="btns"></div>
+
+  <p class="foot"><span data-t="powered"></span> <a href="../" data-t="own"></a></p>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  /* Sample details. On a real page these come from the customer. */
+  var P={phone:'+201000000000',wa:'201000000000',ig:'remotap',fb:'remotap',maps:'https://maps.google.com/?q=New+Cairo',review:'https://maps.google.com/?q=RemoTap',instapay:'omar.hassan@instapay',email:'omar@example.com'};
+  var T={
+    en:{note:'<b>Demo:</b> the free landing page that comes with every card.',get:'Get yours',name:'Omar Hassan',title:'Real estate agent · New Cairo',bio:'Tap a button. Your customers see this page the moment their phone touches your card.',
+        save:'Save contact',call:'Call me',wa:'WhatsApp',ig:'Instagram',fb:'Facebook',pay:'Pay with InstaPay',rev:'Leave a Google review',loc:'Our location',mail:'Email',
+        saved:'Contact file downloaded',copied:'Copied. Open InstaPay and paste it',demoLink:'Demo link: opens on a real page',powered:'Free page by RemoTap.',own:'Get your own',lang:'ع',light:'Light',dark:'Dark'},
+    ar:{note:'<b>ديمو:</b> صفحة الهبوط المجانية اللي بتيجي مع كل كارت.',get:'اطلب كارتك',name:'عمر حسن',title:'وكيل عقارات · التجمع الخامس',bio:'دوس على أي زرار. دي الصفحة اللي عميلك بيشوفها أول ما موبايله يلمس الكارت.',
+        save:'احفظ الرقم',call:'اتصل بيا',wa:'واتساب',ig:'إنستجرام',fb:'فيسبوك',pay:'ادفع بإنستاباي',rev:'اكتب تقييم على جوجل',loc:'موقعنا',mail:'الإيميل',
+        saved:'اتنزل ملف جهة الاتصال',copied:'اتنسخ. افتح إنستاباي والصقه',demoLink:'ده ديمو: على الصفحة الحقيقية بيفتح',powered:'صفحة مجانية من RemoTap.',own:'اعمل صفحتك',lang:'EN',light:'فاتح',dark:'غامق'}
+  };
+  var I={
+    save:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>',
+    call:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+    wa:'<path d="M3 21l1.7-4.6A8.5 8.5 0 1 1 8 19.6z"/><path d="M9 9.5c.3 2 2.5 4.2 4.5 4.5l1.2-1.2 2 .8-.4 1.6c-3.7.4-8-3.9-7.6-7.6l1.6-.4.8 2z"/>',
+    ig:'<rect x="2" y="2" width="20" height="20"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/>',
+    fb:'<path d="M15 3h-3a4 4 0 0 0-4 4v3H5v4h3v7h4v-7h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>',
+    pay:'<rect x="2" y="6" width="20" height="13"/><path d="M2 10h20M6 15h4"/>',
+    rev:'<path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
+    loc:'<path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+    mail:'<rect x="2" y="4" width="20" height="16"/><path d="M2 6l10 7 10-7"/>'
+  };
+  var BTNS=[
+    {k:'save',main:true,act:'vcf'},
+    {k:'call',href:'tel:'+P.phone,sub:P.phone},
+    {k:'wa',href:'https://wa.me/'+P.wa},
+    {k:'pay',act:'copy',sub:P.instapay},
+    {k:'rev',href:P.review},
+    {k:'ig',href:'https://instagram.com/'+P.ig},
+    {k:'fb',href:'https://facebook.com/'+P.fb},
+    {k:'loc',href:P.maps},
+    {k:'mail',href:'mailto:'+P.email,sub:P.email}
+  ];
+  var lang=(function(){try{return localStorage.getItem('rt-lang')==='ar'?'ar':'en'}catch(e){return'en'}})();
+  if(/[?&]lang=ar/.test(location.search))lang='ar';
+  if(/[?&]lang=en/.test(location.search))lang='en';
+
+  /* Hand-drawn border, same recipe as the shop. */
+  var seedN=11;
+  function rng(s){s=s>>>0||1;return function(){s^=s<<13;s^=s>>>17;s^=s<<5;return((s>>>0)%1000)/1000}}
+  function sketchPath(seed){var r=rng(seed),j=function(){return(r()-.5)*2.2};
+    var L=function(a,b,c,d){return'M'+(a+j())+' '+(b+j())+' Q'+((a+c)/2+j())+' '+((b+d)/2+j())+' '+(c+j())+' '+(d+j())};
+    var pass=function(o){return[L(2-o,3,98+o,3),L(97,2-o,97,98+o),L(98+o,97,2-o,97),L(3,98+o,3,2-o)].join(' ')};
+    return pass(1.5)+' '+pass(.5)}
+  function sketch(el){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('class','sketch');s.setAttribute('viewBox','0 0 100 100');s.setAttribute('preserveAspectRatio','none');s.setAttribute('aria-hidden','true');
+    var p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',sketchPath(seedN+=7));s.appendChild(p);el.style.position='relative';el.style.isolation='isolate';el.prepend(s)}
+
+  function svg(path){return'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">'+path+'</svg>'}
+  var ARR='<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>';
+
+  function render(){
+    var t=T[lang];
+    document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+    document.querySelectorAll('[data-t]').forEach(function(e){e.innerHTML=t[e.dataset.t]});
+    document.title=(lang==='ar'?'ديمو الصفحة المجانية':'Free landing page demo')+' | RemoTap';
+    var box=document.getElementById('btns');box.innerHTML='';
+    BTNS.forEach(function(b){
+      var el=document.createElement(b.href?'a':'button');
+      el.className='b'+(b.main?' main':'');
+      if(b.href){el.href=b.href;el.dataset.demo='1'}else el.type='button';
+      el.dataset.k=b.k;
+      el.innerHTML='<span class="i">'+svg(I[b.k])+'</span><span class="lbl">'+t[b.k]+(b.sub?'<span class="sub">'+b.sub+'</span>':'')+'</span>'+(b.main?'':ARR);
+      sketch(el);box.appendChild(el);
+    });
+    document.getElementById('lang').textContent=t.lang;
+    setThemeLabel();
+  }
+  function setThemeLabel(){var d=document.documentElement.dataset.theme!=='light';var b=document.getElementById('theme');var s=b.querySelector('.sketch');b.textContent=T[lang][d?'light':'dark'];if(s)b.prepend(s)}
+
+  var toastT;function toast(msg){var e=document.getElementById('toast');e.textContent=msg;e.classList.remove('show');void e.offsetWidth;e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){e.classList.remove('show')},2200)}
+
+  /* Tap feedback: glitch + wifi icon at the tapped thing's top-left corner. */
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var WIFI='<rect x="10.6" y="17.6" width="2.8" height="2.8" fill="currentColor" stroke="none"/><path d="M8.4 15.2a5 5 0 0 1 7.2 0"/><path d="M5.2 12a9.6 9.6 0 0 1 13.6 0"/><path d="M2 8.6a14.2 14.2 0 0 1 20 0"/>';
+  document.addEventListener('pointerdown',function(e){
+    var el=e.target.closest('a,button');if(!el)return;
+    var r=el.getBoundingClientRect(),w=document.createElement('div');w.className='wifi';w.style.left=r.left+'px';w.style.top=r.top+'px';
+    w.innerHTML=['r','c',''].map(function(c){return'<svg class="'+c+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square">'+WIFI+'</svg>'}).join('');
+    document.body.appendChild(w);setTimeout(function(){w.remove()},650);
+    if(reduce)return;
+    var sk=el.querySelector(':scope>.sketch path');if(sk)sk.setAttribute('d',sketchPath(seedN+=13));
+    el.classList.remove('gx');void el.offsetWidth;el.classList.add('gx');setTimeout(function(){el.classList.remove('gx')},500);
+  });
+
+  document.addEventListener('click',function(e){
+    var el=e.target.closest('.b');if(!el)return;
+    var k=el.dataset.k;
+    if(k==='save'){
+      var t=T[lang];
+      var vcf=['BEGIN:VCARD','VERSION:3.0','FN:'+t.name,'TITLE:'+t.title,'TEL;TYPE=CELL:'+P.phone,'EMAIL:'+P.email,'URL:'+location.href,'END:VCARD'].join('\r\n');
+      var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([vcf],{type:'text/vcard'}));a.download='omar-hassan.vcf';a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
+      toast(t.saved);return;
+    }
+    if(k==='pay'){var done=function(){toast(T[lang].copied)};if(navigator.clipboard)navigator.clipboard.writeText(P.instapay).then(done,done);else done();return}
+    /* Sample links: show what would happen instead of leaving the demo. */
+    if(el.dataset.demo){e.preventDefault();toast(T[lang].demoLink+': '+T[lang][k])}
+  });
+
+  document.getElementById('lang').addEventListener('click',function(){lang=lang==='ar'?'en':'ar';try{localStorage.setItem('rt-lang',lang)}catch(e){};render();var s=this.querySelector('.sketch');})
+  document.getElementById('theme').addEventListener('click',function(){var n=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=n;try{localStorage.setItem('rt-theme',n)}catch(e){};setThemeLabel()});
+
+  render();
+  document.querySelectorAll('.top .chip').forEach(sketch);
+  /* Re-render replaces chip text: keep their borders. */
+  var _render=render;render=function(){_render();document.querySelectorAll('.top .chip').forEach(function(c){if(!c.querySelector('.sketch'))sketch(c)})};
+
+  /* The name flickers now and then. */
+  if(!reduce)(function loop(){setTimeout(function(){var h=document.getElementById('name');h.classList.add('blip');setTimeout(function(){h.classList.remove('blip')},220);loop()},5000+Math.random()*4000)})();
+})();
+</script>
+</body>
+</html>

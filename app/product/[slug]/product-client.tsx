@@ -1,0 +1,329 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { ArrowLeft, Check, Flame, Info, Palette, ShoppingBag, Smartphone, Truck } from "lucide-react";
+import { useStore } from "@/components/providers";
+import { NavLink, useNav } from "@/lib/nav";
+import { Button } from "@/components/ui/button";
+import { NfcWaves } from "@/components/site/brand";
+import { CardPhoto, CoasterPlate, StandPlate, StandVisual, TapCardPhoto } from "@/components/site/product-visuals";
+import { STAND_STYLES, standStyle } from "@/lib/stands";
+import { ProductTile } from "@/components/site/shop";
+import { Qty } from "@/components/site/chrome";
+import { CARD_TYPES, EXTRAS, cardGroup, FEATURES, cardType, deliveryFee, isCarved, type CardType, PRODUCTS, extraPrice, isSized, itemPrice, planLabel, plansFor, price, type ExtraKey, type PlanKey, type ProductKey } from "@/lib/store";
+import { cn } from "@/lib/utils";
+
+export default function ProductClient({ product }: { product: ProductKey }) {
+  const { t, config, money, cur, addToCart, lang } = useStore();
+  const nav = useNav();
+  const qp = nav.params;
+  const plans = plansFor(config, product);
+  const [wantPlan, setPlan] = useState<PlanKey>("plus");
+  const [qty, setQty] = useState(1);
+  const [ctype, setCtype] = useState<CardType>("pvc");
+  const [style, setStyle] = useState("remotap");
+  const [extras, setExtras] = useState<ExtraKey[]>([]);
+  const sized = isSized(product);
+  const [added, setAdded] = useState(false);
+
+  useEffect(() => {
+    const p = qp.get("plan");
+    // Browser-only values (storage, URL, pointer type) are read after hydration of the static page.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (p === "basic" || p === "plus") setPlan(p);
+    const st = qp.get("style");
+    if (st && STAND_STYLES.some((x) => x.id === st)) setStyle(st);
+    const ty = qp.get("type");
+    if (ty && (CARD_TYPES as readonly string[]).includes(ty)) setCtype(cardType(ty));
+  }, [qp]);
+
+  // A product sold in one plan only (the InstaPay card) always uses that plan.
+  const plan: PlanKey = plans.includes(wantPlan) ? wantPlan : (plans[0] ?? "basic");
+  const item = {
+    product,
+    plan,
+    qty,
+    design: product === "card" ? ctype : product === "stand" ? style : undefined,
+    extras: sized ? EXTRAS.filter((e) => extras.includes(e)) : undefined,
+  };
+  const st = standStyle(style);
+  const unit = itemPrice(config, item);
+  const toggleExtra = (e: ExtraKey) => setExtras((cur) => (cur.includes(e) ? cur.filter((x) => x !== e) : [...cur, e]));
+  const others = PRODUCTS.filter((p) => p !== product && plansFor(config, p).length > 0);
+
+  const add = () => {
+    addToCart(item);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1800);
+  };
+  const buy = () => {
+    addToCart(item);
+    nav.push("/order");
+  };
+
+  return (
+    <>
+      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+        <NavLink href="/shop" className="inline-flex items-center gap-2 text-sm text-foreground/55 hover:text-foreground">
+          <ArrowLeft className="size-4 rtl:rotate-180" /> {t("prod.back")}
+        </NavLink>
+      </div>
+      <section className="mx-auto grid max-w-7xl gap-10 px-4 pb-20 pt-6 sm:px-6 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+        {/* visual */}
+        <div className="lg:sticky lg:top-24 lg:self-start">
+          <div className="relative aspect-square overflow-hidden border border-foreground/30 sm:aspect-[5/4]">
+            <div className="hero-grid pointer-events-none absolute inset-0" />
+            {product === "card" && (
+              <div className="absolute inset-0 grid place-items-center">
+                <CardPhoto type={ctype} className="w-[74%] shadow-[0_40px_80px_-30px_rgba(0,0,0,.9)]" />
+              </div>
+            )}
+            {product === "stand" && <StandVisual className="absolute inset-0" design={style} />}
+            {product === "coaster" && (
+              <div className="absolute inset-0 grid place-items-center">
+                <CoasterPlate className={cn("shadow-[0_40px_80px_-30px_rgba(0,0,0,.9)] transition-[width] duration-500", plan === "plus" ? "w-[62%]" : "w-[48%]")} />
+              </div>
+            )}
+            {(product === "instapay" || product === "vfcash") && (
+              <div className="absolute inset-0 grid place-items-center">
+                <TapCardPhoto product={product} className="h-[86%] w-auto" />
+              </div>
+            )}
+          </div>
+          {product === "card" && <p className="mt-4 text-center text-sm text-foreground/60">{t(`ct.${ctype}.d`)}</p>}
+          {/* RemoTap-branded photos are samples: the real stand or coaster is printed with the customer's own brand. */}
+          {(product === "coaster" || (product === "stand" && style === "remotap")) && (
+            <p className="mt-4 flex items-center justify-center gap-2 text-center text-sm text-foreground/60">
+              <Palette className="size-4 shrink-0 text-brand-cyan" /> {t("prod.sample")}
+            </p>
+          )}
+        </div>
+
+        {/* details */}
+        <div>
+          <div className="text-xs font-bold uppercase tracking-[0.25em] text-brand-cyan">{t("hero.store")}</div>
+          <h1 className="mt-3 font-display text-4xl uppercase leading-tight tracking-wide sm:text-5xl">{product === "stand" && style !== "remotap" ? st.name[lang] : t(`prod.${product}`)}</h1>
+          <p className="mt-4 text-lg text-foreground/65">{product === "stand" ? st.desc[lang] : t(`prod.${product}.short`)}</p>
+          {(product === "stand" || product === "coaster") && (
+            <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-purple/50 bg-brand-purple/15 px-3 py-1.5 text-xs font-semibold">
+              <Palette className="size-3.5 text-brand-cyan" /> {t("tag.custom")}
+            </span>
+          )}
+          <div className="mt-6 flex items-end gap-2">
+            <span className="font-display text-4xl">{money(unit)}</span>
+            <span className="pb-1 text-sm font-semibold text-foreground/60">{cur}</span>
+          </div>
+          <p className="mt-2 flex items-center gap-2 text-sm text-foreground/55">
+            <Truck className="size-4 text-brand-cyan" /> {t("prod.delfee", { fee: money(deliveryFee(config, "cairo")), fee2: money(deliveryFee(config, "other")) })}
+          </p>
+
+          {/* plan */}
+          {plans.length > 1 && (
+            <fieldset className="mt-8">
+              <legend className="mb-3 text-sm font-bold uppercase tracking-wider text-foreground/60">{t(sized ? "prod.size" : "prod.plan")}</legend>
+              <div className="grid gap-3 sm:grid-cols-2" role="radiogroup">
+                {plans.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    role="radio"
+                    aria-checked={plan === p}
+                    onClick={() => {
+                      setPlan(p);
+                      nav.replace(`/product/${product}?plan=${p}${product === "stand" ? `&style=${style}` : ""}`);
+                    }}
+                    className={cn(
+                      "relative rounded-2xl border p-4 text-start transition",
+                      plan === p ? "border-brand-purple bg-brand-purple/10 ring-1 ring-brand-purple" : "border-foreground/12 hover:border-foreground/30",
+                    )}
+                  >
+                    {p === "plus" && !sized && (
+                      <span className="absolute -top-2.5 end-3 rounded-full bg-brand-cyan px-2 py-0.5 text-[10px] font-bold uppercase text-background">{t("tag.best")}</span>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="font-display text-sm uppercase tracking-wide" dir="ltr">{planLabel(product, p)}</span>
+                      <span className="font-bold">
+                        {money(price(config, product, p))} <span className="text-xs text-foreground/55">{cur}</span>
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs text-foreground/55">{sized ? t(`size.${product}.${p}`) : t(`o.${p}.d`)}</p>
+                  </button>
+                ))}
+              </div>
+              <p className="mt-3 flex gap-2 text-xs text-foreground/50">
+                <Info className="mt-0.5 size-3.5 shrink-0" /> {t(sized ? "size.help" : "plan.help")}
+              </p>
+            </fieldset>
+          )}
+
+          {sized && (
+            <fieldset className="mt-7">
+              <legend className="mb-3 text-sm font-bold uppercase tracking-wider text-foreground/60">{t("x.title")}</legend>
+              <div className="grid gap-3">
+                {EXTRAS.map((e) => {
+                  const on = extras.includes(e);
+                  return (
+                    <label
+                      key={e}
+                      className={cn(
+                        "flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition",
+                        on ? "border-brand-purple bg-brand-purple/10 ring-1 ring-brand-purple" : "border-foreground/12 hover:border-foreground/30",
+                      )}
+                    >
+                      <input type="checkbox" checked={on} onChange={() => toggleExtra(e)} className="mt-1 size-4 shrink-0 accent-[#8c52ff]" />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center justify-between gap-3 font-semibold">
+                          {t(`x.${e}`)}
+                          <span className="whitespace-nowrap text-sm">
+                            +{money(extraPrice(config))} <span className="text-xs text-foreground/55">{cur}</span>
+                          </span>
+                        </span>
+                        <span className="mt-1 block text-xs text-foreground/55">{t(`x.${e}.d`)}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
+          )}
+
+          {product === "stand" && (
+            <fieldset className="mt-7">
+              <legend className="mb-3 text-sm font-bold uppercase tracking-wider text-foreground/60">
+                {t("prod.style")}: <span className="text-foreground">{st.name[lang]}</span>
+              </legend>
+              <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-7" role="radiogroup">
+                {STAND_STYLES.map((x) => (
+                  <button
+                    key={x.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={style === x.id}
+                    aria-label={x.name[lang]}
+                    title={x.name[lang]}
+                    onClick={() => {
+                      setStyle(x.id);
+                      nav.replace(`/product/stand?plan=${plan}&style=${x.id}`);
+                    }}
+                    className={cn("rounded-xl border-2 p-1 transition hover:scale-105", style === x.id ? "border-foreground" : "border-foreground/15")}
+                  >
+                    <StandPlate design={x.id} className="w-full rounded-lg" />
+                  </button>
+                ))}
+              </div>
+              <p className="mt-3 text-xs text-foreground/45">{t("prod.style.note")}</p>
+            </fieldset>
+          )}
+
+          {product === "card" && (
+            <fieldset className="mt-7">
+              <legend className="mb-3 text-sm font-bold uppercase tracking-wider text-foreground/60">
+                {t("prod.design")}: <span className="text-foreground">{t(`ct.${ctype}`)}</span>
+              </legend>
+              <div className={cn("grid grid-cols-2 gap-3", cardGroup(ctype).types.length < 2 && "hidden")} role="radiogroup">
+                {cardGroup(ctype).types.map((k) => {
+                  const diff = Number(config.card_type_price?.[k] ?? 0);
+                  return (
+                    <button
+                      key={k}
+                      type="button"
+                      role="radio"
+                      aria-checked={ctype === k}
+                      onClick={() => {
+                        setCtype(k);
+                        nav.replace(`/product/card?plan=${plan}&type=${k}`);
+                      }}
+                      className={cn("rounded-2xl border p-2 text-start transition", ctype === k ? "border-brand-purple bg-brand-purple/10 ring-1 ring-brand-purple" : "border-foreground/12 hover:border-foreground/30")}
+                    >
+                      <CardPhoto type={k} className="w-full rounded-xl" />
+                      <span className="mt-2 block px-1 text-xs font-bold">{t(`ct.${k}`)}</span>
+                      <span className="block px-1 text-[11px] text-foreground/50">{diff === 0 ? " " : `${diff > 0 ? "+" : "−"}${money(Math.abs(diff))} ${cur}`}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-3 text-xs text-foreground/45">{t("prod.design.note")}</p>
+              {isCarved(ctype) && (
+                <p className="mt-3 flex gap-2 rounded-2xl border border-brand-cyan/30 bg-brand-cyan/10 p-3 text-xs text-foreground/80">
+                  <Flame className="mt-0.5 size-4 shrink-0 text-brand-cyan" /> {t("ct.carve")}
+                </p>
+              )}
+            </fieldset>
+          )}
+
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Qty value={qty} onChange={setQty} max={config.max_quantity} className="h-12" />
+            <Button size="lg" variant="outline" className="flex-1" onClick={add}>
+              {added ? <Check /> : <ShoppingBag />} {added ? t("cart.added") : t("cart.add")}
+            </Button>
+          </div>
+          <Button size="lg" className="mt-3 w-full" onClick={buy}>
+            <NfcWaves className="size-5" /> {t("cart.buy")} · {money(unit * qty)} {cur}
+          </Button>
+
+          <div className="mt-10 rounded-3xl border border-foreground/10 bg-foreground/[0.02] p-6">
+            <h2 className="font-display text-sm uppercase tracking-wider">{t("prod.get")}</h2>
+            <ul className="mt-5 space-y-3 text-sm">
+              {FEATURES[product][plan]
+                .filter(([, on]) => on)
+                .map(([k]) => (
+                  <li key={k} className="flex gap-3">
+                    <Check className="mt-0.5 size-4 shrink-0 text-brand-cyan" /> {t(k)}
+                  </li>
+                ))}
+            </ul>
+          </div>
+          {product === "card" && (
+            <div className="mt-4 flex gap-4 rounded-3xl border border-foreground/10 bg-foreground/[0.02] p-6">
+              <Smartphone className="size-5 shrink-0 text-brand-cyan" />
+              <div>
+                <h2 className="font-display text-sm uppercase tracking-wider">{t("ct.free")}</h2>
+                <p className="mt-2 text-sm text-foreground/60">{t("ct.free.b")}</p>
+                <a href="/p/free.html" target="_blank" rel="noopener" className="mt-2 inline-block text-sm font-semibold underline underline-offset-4">{t("ct.free.demo")}</a>
+                <Button asChild variant="outline" size="sm" className="mt-4">
+                  <NavLink href="/demo">{t("ct.demo")}</NavLink>
+                </Button>
+              </div>
+            </div>
+          )}
+          <div className="mt-4 flex gap-4 rounded-3xl border border-foreground/10 bg-foreground/[0.02] p-6">
+            <Truck className="size-5 shrink-0 text-brand-cyan" />
+            <div>
+              <h2 className="font-display text-sm uppercase tracking-wider">{t("prod.delivery")}</h2>
+              <p className="mt-2 text-sm text-foreground/60">{t("prod.delivery.b")}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {others.length > 0 && (
+        <section className="mx-auto max-w-7xl border-t border-foreground/10 px-4 py-16 sm:px-6">
+          <h2 className="mb-10 font-display text-2xl uppercase tracking-wide">{t("prod.other")}</h2>
+          <div className="grid gap-x-3 gap-y-10 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-3">
+            {others.map((p, i) => (
+              <ProductTile key={p} product={p} index={i} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* phone: price + buy always in reach */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-foreground/10 bg-background/90 px-4 pb-[calc(12px+env(safe-area-inset-bottom,0px))] pt-3 backdrop-blur-xl lg:hidden">
+        <div className="flex items-center gap-3 pe-16">
+          <div className="min-w-0">
+            <div className="truncate text-xs text-foreground/55">
+              {t(`prod.${product}`)} {plans.length > 1 ? planLabel(product, plan) : ""}
+            </div>
+            <div className="font-display text-lg">
+              {money(unit * qty)} <span className="text-xs text-foreground/60">{cur}</span>
+            </div>
+          </div>
+          <Button className="ms-auto" onClick={add}>
+            <ShoppingBag /> {t("cart.add")}
+          </Button>
+        </div>
+      </div>
+      <div className="h-20 lg:hidden" />
+    </>
+  );
+}
