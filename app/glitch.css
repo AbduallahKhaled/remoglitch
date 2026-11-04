@@ -38,6 +38,9 @@
 /* Hero headline. */
 .lab-hero { font-family: "Tektur", "Cairo", sans-serif !important; font-size: clamp(44px, 10vw, 128px) !important; font-weight: 800 !important; letter-spacing: -0.02em; line-height: 0.98; white-space: pre-line; }
 [dir="rtl"] .lab-hero { letter-spacing: 0; line-height: 1.25; font-size: clamp(40px, 9vw, 112px) !important; }
+/* Home hero: smaller on phones so the tap animation fits beside the headline. */
+.lab-hero.hero-tight { font-size: clamp(28px, 8.4vw, 128px) !important; }
+[dir="rtl"] .lab-hero.hero-tight { font-size: clamp(26px, 7.6vw, 112px) !important; }
 
 /* Tap glitch, 0.5s: the text flashes the glitch colours with an RGB split and jitters,
    the box lines (border, sketch stroke, checkbox square) flash too. Photos and backgrounds stay. */
