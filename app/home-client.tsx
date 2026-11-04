@@ -1,38 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ArrowRight, Smartphone, QrCode, Truck, RefreshCw } from "lucide-react";
 import { useStore } from "@/components/providers";
 import { NavLink } from "@/lib/nav";
 import { Button } from "@/components/ui/button";
-import { GlitchHeadline, GlitchCard } from "@/components/site/glitch-hero";
+import { GlitchHeadline } from "@/components/site/glitch-hero";
+import { TapStand } from "@/components/site/tap-stand";
 import { NfcWaves } from "@/components/site/brand";
-import { ProductGrid, SectionHead } from "@/components/site/shop";
+import { Chooser, ProductGrid, SectionHead } from "@/components/site/shop";
 import { CtaBand } from "@/components/site/sections";
 import { Reviews } from "@/components/site/reviews";
 import { cn } from "@/lib/utils";
 
-function useCoarse() {
-  const [c, setC] = useState(false);
-  // Browser-only values (storage, URL, pointer type) are read after hydration of the static page.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => setC(matchMedia("(hover: none)").matches), []);
-  return c;
-}
-
 function Hero() {
-  const { t, config, lang } = useStore();
-  const coarse = useCoarse();
+  const { t, lang } = useStore();
   return (
     <section className="relative">
-      <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 pb-14 pt-10 sm:px-6 md:grid-cols-[1.15fr_1fr] md:pt-16">
-        <div>
-          <GlitchHeadline
-            text={[t("hero.big1"), t("hero.big2"), t("hero.big3")].join("\n")}
-            dir={lang === "ar" ? "rtl" : "ltr"}
-            className={lang === "ar" ? "" : "uppercase"}
-          />
-          <p className="mt-8 max-w-md text-base text-foreground/70 sm:text-lg">{t("hero.lead")}</p>
+      {/* Phones: headline and animation side by side, text below. md+: animation spans both rows on the right. */}
+      <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr] items-center gap-x-3 gap-y-8 px-4 pb-14 pt-10 sm:px-6 md:grid-cols-[1.15fr_1fr] md:gap-x-10 md:pt-16">
+        <GlitchHeadline
+          text={[t("hero.big1"), t("hero.big2"), t("hero.big3")].join("\n")}
+          dir={lang === "ar" ? "rtl" : "ltr"}
+          className={cn("hero-tight", lang === "ar" ? "" : "uppercase")}
+        />
+        <TapStand className="mx-auto w-full max-w-[480px] md:row-span-2" />
+        <div className="col-span-2 md:col-span-1">
+          <p className="max-w-md text-base text-foreground/70 sm:text-lg">{t("hero.lead")}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg">
               <NavLink href="/shop">
@@ -44,7 +37,18 @@ function Hero() {
             </Button>
           </div>
         </div>
-        <GlitchCard hint={coarse ? t("hero.hint.touch") : t("hero.hint.mouse")} domain={config.domain || "remotap.com"} />
+      </div>
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 pb-6 sm:px-6">
+        <Button asChild size="lg" className="h-14 text-base">
+          <NavLink href="/shop?type=stands">
+            {t("filter.stands")} <ArrowRight className="rtl:-scale-x-100" />
+          </NavLink>
+        </Button>
+        <Button asChild size="lg" variant="outline" className="h-14 text-base">
+          <NavLink href="/shop?type=cards">
+            {t("filter.cards")} <ArrowRight className="rtl:-scale-x-100" />
+          </NavLink>
+        </Button>
       </div>
     </section>
   );
@@ -78,6 +82,9 @@ export default function HomeClient() {
   return (
     <>
       <Hero />
+      <div className="mx-auto max-w-7xl px-4 pb-6 sm:px-6">
+        <Chooser />
+      </div>
       <TrustStrip />
       <section id="shop" className="mx-auto max-w-7xl scroll-mt-24 px-4 pt-20 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-6">

@@ -92,9 +92,49 @@ export function ProductTile({ product, group, plan: startPlan = "plus", index = 
   );
 }
 
+/** One ready stand design tile, sold as the Basic stand with that design. */
+function ReadyStandTile({ id, index = 0 }: { id: string; index?: number }) {
+  const { t, lang, config, money, cur, addToCart } = useStore();
+  const st = READY_STANDS.find((x) => x.id === id);
+  if (!st || !plansFor(config, "stand").includes("basic")) return null;
+  const each = price(config, "stand", "basic");
+  const i = index;
+  const href = `/product/stand?plan=basic&style=${st.id}`;
+  return (
+      <article data-gx-item className="reveal group flex flex-col" style={{ transitionDelay: `${(i % 3) * 70}ms` }}>
+        <NavLink href={href} className="block">
+          <div className="rt-box relative grid aspect-square place-items-center overflow-hidden rounded-3xl">
+            <div className="absolute inset-0 opacity-60 hero-grid" />
+            <StandPlate design={st.id} className="w-[68%] shadow-[0_24px_50px_-18px_rgba(0,0,0,.9)] transition-transform duration-700 group-hover:scale-105" />
+            <span className="absolute start-3 top-3 rounded-full bg-foreground/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-background">{t("tag.custom.short")}</span>
+          </div>
+        </NavLink>
+        <div className="mt-4 flex items-start justify-between gap-2 px-1">
+          <h3 className="font-display text-[12px] uppercase leading-snug tracking-wide sm:text-[14px]">
+            <NavLink href={href}>{st.name[lang]}</NavLink>
+          </h3>
+          <div className="shrink-0 font-extrabold sm:text-lg">
+            {money(each)} <span className="text-[10px] font-semibold text-foreground/60 sm:text-xs">{cur}</span>
+          </div>
+        </div>
+        <p className="mt-1.5 line-clamp-3 px-1 text-xs text-foreground/55 sm:text-sm">{st.desc[lang]}</p>
+        <Button
+          size="sm"
+          variant="outline"
+          className="mx-1 mt-4 self-start"
+          onClick={() => {
+            addToCart({ product: "stand", plan: "basic", qty: 1, design: st.id });
+          }}
+        >
+          <ShoppingBag /> {t("cart.add")}
+        </Button>
+      </article>
+  );
+}
+
 /** The ready stand designs (Google, Instagram, InstaPay…), each its own product at the Basic stand price. */
 export function StandRange() {
-  const { t, lang, config, money, cur, addToCart } = useStore();
+  const { t, config, money } = useStore();
   if (!plansFor(config, "stand").includes("basic")) return null;
   const each = price(config, "stand", "basic");
   return (
@@ -109,39 +149,9 @@ export function StandRange() {
         </span>
       </div>
       <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-4 lg:grid-cols-4">
-        {READY_STANDS.map((st, i) => {
-          const href = `/product/stand?plan=basic&style=${st.id}`;
-          return (
-            <article key={st.id} data-gx-item className="reveal group flex flex-col" style={{ transitionDelay: `${(i % 3) * 70}ms` }}>
-              <NavLink href={href} className="block">
-                <div className="rt-box relative grid aspect-square place-items-center overflow-hidden rounded-3xl">
-                  <div className="absolute inset-0 opacity-60 hero-grid" />
-                  <StandPlate design={st.id} className="w-[68%] shadow-[0_24px_50px_-18px_rgba(0,0,0,.9)] transition-transform duration-700 group-hover:scale-105" />
-                  <span className="absolute start-3 top-3 rounded-full bg-foreground/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-background">{t("tag.custom.short")}</span>
-                </div>
-              </NavLink>
-              <div className="mt-4 flex items-start justify-between gap-2 px-1">
-                <h3 className="font-display text-[12px] uppercase leading-snug tracking-wide sm:text-[14px]">
-                  <NavLink href={href}>{st.name[lang]}</NavLink>
-                </h3>
-                <div className="shrink-0 font-extrabold sm:text-lg">
-                  {money(each)} <span className="text-[10px] font-semibold text-foreground/60 sm:text-xs">{cur}</span>
-                </div>
-              </div>
-              <p className="mt-1.5 line-clamp-3 px-1 text-xs text-foreground/55 sm:text-sm">{st.desc[lang]}</p>
-              <Button
-                size="sm"
-                variant="outline"
-                className="mx-1 mt-4 self-start"
-                onClick={() => {
-                  addToCart({ product: "stand", plan: "basic", qty: 1, design: st.id });
-                }}
-              >
-                <ShoppingBag /> {t("cart.add")}
-              </Button>
-            </article>
-          );
-        })}
+        {READY_STANDS.map((st, i) => (
+          <ReadyStandTile key={st.id} id={st.id} index={i} />
+        ))}
       </div>
     </div>
   );
@@ -270,35 +280,68 @@ export function ShopCatalog({ initial = "all" }: { initial?: ShopFilter }) {
   );
 }
 
+// Home order (owner's pick): Google reviews, InstaPay and Vodafone Cash stand coasters, custom stand, metal card, then the rest.
+const HOME_READY = ["google", "instapay", "vfcash"];
+const HOME_FIRST = ["stand", "card:metal"];
+
 export function ProductGrid() {
   const { config } = useStore();
   const list = PRODUCTS.filter((p) => plansFor(config, p).length > 0);
+  const key = (e: { product: ProductKey; group?: CardGroupKey }) => (e.group ? `card:${e.group}` : e.product);
+  const tiles = tilesFor(list);
+  const first = HOME_FIRST.flatMap((k) => tiles.filter((e) => key(e) === k));
+  const rest = tiles.filter((e) => !HOME_FIRST.includes(key(e)));
   return (
     <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-4 lg:grid-cols-4">
-      {tilesFor(list).map((e, i) => (
-        <ProductTile key={e.group ?? e.product} product={e.product} group={e.group} index={i} compact />
+      {HOME_READY.map((id, i) => (
+        <ReadyStandTile key={id} id={id} index={i} />
+      ))}
+      {[...first, ...rest].map((e, i) => (
+        <ProductTile key={e.group ?? e.product} product={e.product} group={e.group} index={i + HOME_READY.length} compact />
       ))}
     </div>
   );
 }
 
-/** "What do you need it for?" helper: three answers, one recommended product. */
+/** "What do you need it for?" helper: three answers, each with its own versions (wallet, platform, material). */
+type PickVariant = { v: string; product: ProductKey; design?: string };
+const PICKS: { k: string; plan: PlanKey; variants: PickVariant[] }[] = [
+  { k: "shop", plan: "basic", variants: [{ v: "instapay", product: "instapay" }, { v: "vfcash", product: "vfcash" }] },
+  {
+    k: "review",
+    plan: "plus",
+    variants: [
+      { v: "google", product: "stand", design: "google" },
+      { v: "instagram", product: "stand", design: "instagram" },
+      { v: "facebook", product: "stand", design: "facebook" },
+    ],
+  },
+  {
+    k: "me",
+    plan: "plus",
+    variants: [
+      { v: "metal", product: "card", design: "metal" },
+      { v: "pvc", product: "card", design: "pvc" },
+      { v: "wood", product: "card", design: "wood" },
+    ],
+  },
+];
+
 export function Chooser() {
   const { t, lang, config, money, cur, addToCart } = useStore();
-  // Each answer carries the exact product look it recommends, so the picture matches the answer.
-  const opts: { k: string; product: ProductKey; plan: PlanKey; design?: string; why: string }[] = [
-    { k: "shop", product: "instapay", plan: "basic", why: "pick.why.instapay" },
-    { k: "review", product: "stand", plan: "plus", design: "google", why: "pick.why.stand" },
-    { k: "me", product: "card", plan: "plus", why: "pick.why.card" },
-  ];
-  const sold = opts.filter((o) => plansFor(config, o.product).includes(o.plan));
+  const sold = PICKS.map((p) => ({ ...p, variants: p.variants.filter((x) => plansFor(config, x.product).includes(p.plan)) })).filter((p) => p.variants.length);
   const [sel, setSel] = useState(0);
-  const o = sold[sel] ?? sold[0];
-  if (!o) return null;
-  const name = o.design ? standStyle(o.design).name[lang] : t(`prod.${o.product}`);
+  const [vSel, setVSel] = useState<Record<string, number>>({});
+  const p = sold[sel] ?? sold[0];
+  if (!p) return null;
+  const vi = Math.min(vSel[p.k] ?? 0, p.variants.length - 1);
+  const o = p.variants[vi];
+  const name = o.product === "card" ? t(`ct.${o.design}`) : o.product === "stand" ? standStyle(o.design!).name[lang] : t(`prod.${o.product}`);
+  const why = p.k === "shop" ? `pick.why.${o.v}` : p.k === "review" ? "pick.why.stand" : "pick.why.card";
   const q = new URLSearchParams();
-  if (plansFor(config, o.product).length > 1) q.set("plan", o.plan);
-  if (o.design) q.set("style", o.design);
+  if (plansFor(config, o.product).length > 1) q.set("plan", p.plan);
+  if (o.product === "stand" && o.design) q.set("style", o.design);
+  if (o.product === "card" && o.design) q.set("type", o.design);
   return (
     <div className="reveal rt-box grid gap-6 rounded-[2rem] p-5 sm:p-8 lg:grid-cols-[1.1fr_1fr] lg:items-center">
       <div>
@@ -328,27 +371,42 @@ export function Chooser() {
         </div>
       </div>
       <div className="rt-box flex flex-col gap-5 rounded-3xl bg-background p-5 sm:flex-row sm:items-center">
-        <div key={o.k} className="grid aspect-square w-full shrink-0 animate-[rt-fade_.35s_ease-out] place-items-center overflow-hidden rounded-2xl motion-reduce:animate-none sm:w-44">
-          <RailVisual item={{ product: o.product, plan: o.plan, design: o.design }} />
+        <div key={`${p.k}-${o.v}`} className="grid aspect-square w-full shrink-0 animate-[rt-fade_.35s_ease-out] place-items-center overflow-hidden rounded-2xl motion-reduce:animate-none sm:w-44">
+          <RailVisual item={{ product: o.product, plan: p.plan, design: o.design }} />
         </div>
         <div className="min-w-0">
           <div className="font-display text-lg uppercase tracking-wide">
             {name}{" "}
             {plansFor(config, o.product).length > 1 && (
               <span className="text-grad" dir="ltr">
-                {planLabel(o.product, o.plan)}
+                {planLabel(o.product, p.plan)}
               </span>
             )}
           </div>
-          <p className="mt-2 text-sm text-foreground/60">{t(o.why)}</p>
+          {p.variants.length > 1 && (
+            <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label={t(`pick.${p.k}`)}>
+              {p.variants.map((x, i) => (
+                <button
+                  key={x.v}
+                  role="radio"
+                  aria-checked={vi === i}
+                  onClick={() => setVSel((s) => ({ ...s, [p.k]: i }))}
+                  className={cn("rounded-full border px-4 py-2 text-sm font-semibold transition", vi === i ? "border-foreground bg-foreground text-background" : "border-foreground/30 opacity-80 hover:opacity-100")}
+                >
+                  {t(`pick.v.${x.v}`)}
+                </button>
+              ))}
+            </div>
+          )}
+          <p className="mt-2 text-sm text-foreground/60">{t(why)}</p>
           <div className="mt-3 font-display text-2xl">
-            {money(price(config, o.product, o.plan))} <span className="text-xs text-foreground/55">{cur}</span>
+            {money(itemPrice(config, { product: o.product, plan: p.plan, design: o.design }))} <span className="text-xs text-foreground/55">{cur}</span>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button
               size="sm"
               onClick={() => {
-                addToCart({ product: o.product, plan: o.plan, qty: 1, design: o.product === "card" ? "holo" : o.design });
+                addToCart({ product: o.product, plan: p.plan, qty: 1, design: o.design });
               }}
             >
               <ShoppingBag /> {t("cart.add")}
